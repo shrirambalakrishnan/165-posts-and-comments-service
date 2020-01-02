@@ -1,5 +1,6 @@
 const PORT = 9002;
 const { ApolloServer, gql } = require("apollo-server");
+const { buildFederatedSchema } = require("@apollo/federation");
 
 // Posts dataset
 const posts = [
@@ -74,7 +75,14 @@ const resolvers = {
   }
 };
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+  schema: buildFederatedSchema([
+    {
+      typeDefs,
+      resolvers
+    }
+  ])
+});
 
 // The `listen` method launches a web server.
 server.listen(PORT).then(({ url }) => {

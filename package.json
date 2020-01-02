@@ -11,6 +11,7 @@
   "author": "shriram",
   "license": "MIT",
   "dependencies": {
+    "@apollo/federation": "^0.11.2",
     "apollo-server": "^2.9.14",
     "graphql": "^14.5.8",
     "nodemon": "^2.0.2"
