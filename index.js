@@ -4,35 +4,7 @@ const PORT = 9002;
 const { ApolloServer, gql } = require("apollo-server");
 const { buildFederatedSchema } = require("@apollo/federation");
 
-// // Posts dataset
-// const posts = [
-//   {
-//     id: 1,
-//     text: "Watch Avengers!"
-//   },
-//   {
-//     id: 2,
-//     text: "Iron Man rocks!!"
-//   }
-// ];
-
-// const comments = [
-//   {
-//     id: 1,
-//     text: "Yes, we will!",
-//     postId: 1
-//   },
-//   {
-//     id: 2,
-//     text: "Definitely",
-//     postId: 1
-//   },
-//   {
-//     id: 3,
-//     text: "No, Jarvis rocks!",
-//     postId: 2
-//   }
-// ];
+const { Post, Comment } = require("./models");
 
 const typeDefs = gql`
   type Comment {
@@ -47,13 +19,14 @@ const typeDefs = gql`
   }
 
   type Query {
-    posts: [Post]
+    postsV1: [Post]
+    postsV2: [Post]
   }
 `;
 
-const allPosts = async () => {
-  let allPosts = posts;
-  let allComments = comments;
+const allPostsV1 = async () => {
+  let allPosts = await Post.findAll();
+  let allComments = await Comment.findAll();
   let postsWithComments;
 
   await Promise.all(
@@ -71,9 +44,21 @@ const allPosts = async () => {
   return postsWithComments;
 };
 
+const allPostsV2 = async () => {
+  let posts = await Post.findAll();
+  return posts;
+};
+
 const resolvers = {
+  Post: {
+    comments: async parent => {
+      const comment = await Comment.findAll({ where: { postId: parent.id } });
+      return comment;
+    }
+  },
   Query: {
-    posts: async () => await allPosts()
+    postsV1: async () => await allPostsV1(),
+    postsV2: async () => await allPostsV2()
   }
 };
 
