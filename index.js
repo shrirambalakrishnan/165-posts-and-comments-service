@@ -1,36 +1,38 @@
+require("dotenv").config();
+
 const PORT = 9002;
 const { ApolloServer, gql } = require("apollo-server");
 const { buildFederatedSchema } = require("@apollo/federation");
 
-// Posts dataset
-const posts = [
-  {
-    id: 1,
-    text: "Watch Avengers!"
-  },
-  {
-    id: 2,
-    text: "Iron Man rocks!!"
-  }
-];
+// // Posts dataset
+// const posts = [
+//   {
+//     id: 1,
+//     text: "Watch Avengers!"
+//   },
+//   {
+//     id: 2,
+//     text: "Iron Man rocks!!"
+//   }
+// ];
 
-const comments = [
-  {
-    id: 1,
-    text: "Yes, we will!",
-    postId: 1
-  },
-  {
-    id: 2,
-    text: "Definitely",
-    postId: 1
-  },
-  {
-    id: 3,
-    text: "No, Jarvis rocks!",
-    postId: 2
-  }
-];
+// const comments = [
+//   {
+//     id: 1,
+//     text: "Yes, we will!",
+//     postId: 1
+//   },
+//   {
+//     id: 2,
+//     text: "Definitely",
+//     postId: 1
+//   },
+//   {
+//     id: 3,
+//     text: "No, Jarvis rocks!",
+//     postId: 2
+//   }
+// ];
 
 const typeDefs = gql`
   type Comment {
