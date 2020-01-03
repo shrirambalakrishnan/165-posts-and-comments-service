@@ -3,6 +3,7 @@ require("dotenv").config();
 const PORT = 9002;
 const { ApolloServer, gql } = require("apollo-server");
 const { buildFederatedSchema } = require("@apollo/federation");
+const DataLoader = require("dataloader");
 
 const { Post, Comment } = require("./models");
 
@@ -50,10 +51,15 @@ const allPostsV2 = async () => {
 };
 
 const resolvers = {
+  // Post: {
+  //   comments: async parent => {
+  //     const comment = await Comment.findAll({ where: { postId: parent.id } });
+  //     return comment;
+  //   }
+  // },
   Post: {
-    comments: async parent => {
-      const comment = await Comment.findAll({ where: { postId: parent.id } });
-      return comment;
+    comments: async (parent, args, ctx) => {
+      return ctx.commentsLoader.load(parent.id);
     }
   },
   Query: {
@@ -63,12 +69,29 @@ const resolvers = {
 };
 
 const server = new ApolloServer({
-  schema: buildFederatedSchema([
-    {
-      typeDefs,
-      resolvers
-    }
-  ])
+  typeDefs,
+  resolvers,
+  context: () => {
+    return {
+      commentsLoader: new DataLoader(async keys => {
+        const comments = await Comment.findAll({ where: { postId: keys } });
+
+        const commentsMap = {};
+
+        comments.forEach(comment => {
+          if (commentsMap[comment.postId])
+            commentsMap[comment.postId].push(comment);
+          else commentsMap[comment.postId] = [comment];
+        });
+
+        console.log(`----------- commentsMap --------------`);
+        console.log(JSON.stringify(commentsMap));
+        console.log(`-------------------------------`);
+
+        return keys.map(key => commentsMap[key]);
+      })
+    };
+  }
 });
 
 // The `listen` method launches a web server.
